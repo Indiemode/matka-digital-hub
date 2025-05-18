@@ -46,12 +46,13 @@ const SignupForm = () => {
         return;
       }
       
-      // Generate a UUID for the user
-      const userId = crypto.randomUUID();
+      // Create a valid email using the mobile number + domain
+      // This ensures the email is valid while still being unique per user
+      const email = `${mobileNumber}@msm.market`;
       
-      // Create the auth user with a generated email (UUID@msm.market)
+      // Create the auth user with a valid email format
       const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: `${userId}@msm.market`,
+        email: email,
         password: password,
         options: {
           data: {

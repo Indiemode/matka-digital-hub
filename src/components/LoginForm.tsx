@@ -26,23 +26,12 @@ const LoginForm = () => {
     try {
       setIsLoading(true);
       
-      // First, get the user's email from the profiles table using mobile number
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('mobile_number', mobileNumber)
-        .single();
-
-      if (profileError || !profileData) {
-        console.error('Error fetching profile:', profileError);
-        toast.error('Mobile number not registered');
-        setIsLoading(false);
-        return;
-      }
+      // Create the email from the mobile number
+      const email = `${mobileNumber}@msm.market`;
       
-      // Now sign in with the user's UUID and password
+      // Sign in with email and password
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: `${profileData.id}@msm.market`, // Using UUID as email
+        email: email,
         password: password
       });
 
