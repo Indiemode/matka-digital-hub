@@ -26,8 +26,8 @@ const LoginForm = () => {
     try {
       setIsLoading(true);
       
-      // Create the email from the mobile number
-      const email = `${mobileNumber}@msm.market`;
+      // Create the email from the mobile number using a valid domain
+      const email = `${mobileNumber}@gmail.com`;
       
       // Sign in with email and password
       const { data, error } = await supabase.auth.signInWithPassword({

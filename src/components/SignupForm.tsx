@@ -46,9 +46,9 @@ const SignupForm = () => {
         return;
       }
       
-      // Create a valid email using the mobile number + domain
-      // This ensures the email is valid while still being unique per user
-      const email = `${mobileNumber}@msm.market`;
+      // Create a valid email using the mobile number
+      // We're using gmail.com which is always accepted as valid
+      const email = `${mobileNumber}@gmail.com`;
       
       // Create the auth user with a valid email format
       const { data: authData, error: authError } = await supabase.auth.signUp({
