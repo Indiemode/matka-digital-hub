@@ -1,8 +1,10 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
-import { Home, FileClock, User, History } from 'lucide-react';
+import { Home, FileClock, User, History, LogOut } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -11,22 +13,65 @@ interface DashboardLayoutProps {
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, title }) => {
   const { t, language, setLanguage } = useLanguage();
+  const [userName, setUserName] = useState<string>('');
+  
+  useEffect(() => {
+    // Set document title
+    document.title = `MSM Market - ${title}`;
+    
+    // Get user profile data
+    const fetchUserProfile = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session?.user) {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('name')
+          .eq('id', session.user.id)
+          .single();
+          
+        if (profileData) {
+          setUserName(profileData.name);
+        }
+      }
+    };
+    
+    fetchUserProfile();
+  }, [title]);
 
   const toggleLanguage = () => {
     setLanguage(language === 'en' ? 'hi' : 'en');
+  };
+  
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    toast.success('Logged out successfully');
+    window.location.href = '/';
   };
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
       {/* Header */}
       <header className="bg-matka-red text-white p-4 flex items-center justify-between shadow-md">
-        <h1 className="text-xl font-bold">{t('appName')}</h1>
-        <button 
-          onClick={toggleLanguage}
-          className="px-3 py-1 bg-white text-matka-red rounded-md font-medium text-sm"
-        >
-          {language === 'en' ? 'हिंदी' : 'English'}
-        </button>
+        <div className="flex items-center">
+          <h1 className="text-xl font-bold">MSM Market</h1>
+          {userName && <span className="ml-2 text-sm">({userName})</span>}
+        </div>
+        <div className="flex items-center">
+          <button 
+            onClick={toggleLanguage}
+            className="px-3 py-1 bg-white text-matka-red rounded-md font-medium text-sm mr-2"
+          >
+            {language === 'en' ? 'हिंदी' : 'English'}
+          </button>
+          <button
+            onClick={handleLogout}
+            className="p-1"
+            aria-label="Logout"
+          >
+            <LogOut className="w-5 h-5" />
+          </button>
+        </div>
       </header>
 
       {/* Main Content */}

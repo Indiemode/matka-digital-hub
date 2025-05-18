@@ -3,19 +3,20 @@ import React, { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Lock, User, Mail, Phone } from 'lucide-react';
+import { Lock, User, Phone } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 const SignupForm = () => {
   const { t } = useLanguage();
   const [name, setName] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
-  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Basic validation
@@ -29,19 +30,77 @@ const SignupForm = () => {
       return;
     }
 
-    // In a real application, you would connect to Supabase here
-    console.log('Signup attempt with:', { name, mobileNumber, email, password });
+    try {
+      setIsLoading(true);
+      
+      // Check if mobile number already exists
+      const { data: existingProfile, error: checkError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('mobile_number', mobileNumber)
+        .maybeSingle();
+      
+      if (existingProfile) {
+        toast.error('Mobile number already registered');
+        setIsLoading(false);
+        return;
+      }
+      
+      // Generate a UUID for the user
+      const userId = crypto.randomUUID();
+      
+      // Create the auth user with a generated email (UUID@msm.market)
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: `${userId}@msm.market`,
+        password: password,
+        options: {
+          data: {
+            name: name
+          }
+        }
+      });
+      
+      if (authError) {
+        console.error('Error creating user:', authError);
+        toast.error(authError.message || 'Failed to create account');
+        return;
+      }
+      
+      if (!authData.user) {
+        toast.error('Failed to create user account');
+        return;
+      }
+      
+      // Create the profile with the mobile number
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: authData.user.id,
+          name: name,
+          mobile_number: mobileNumber
+        });
+      
+      if (profileError) {
+        console.error('Error creating profile:', profileError);
+        toast.error('Failed to create user profile');
+        return;
+      }
 
-    // Simulate successful signup
-    toast.success('Account created successfully!');
-    // Redirect to login page
-    window.location.href = '/';
+      toast.success('Account created successfully!');
+      // Redirect to login page
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Signup error:', error);
+      toast.error('An unexpected error occurred');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <Card className="w-full max-w-md mx-auto bg-white shadow-lg">
       <CardHeader className="bg-matka-red text-white text-center py-4">
-        <CardTitle className="text-2xl font-bold">{t('signup')}</CardTitle>
+        <CardTitle className="text-2xl font-bold">{t('MSM Market - Sign Up')}</CardTitle>
       </CardHeader>
       <CardContent className="p-6">
         <form onSubmit={handleSignup} className="space-y-4">
@@ -67,19 +126,6 @@ const SignupForm = () => {
               placeholder={t('mobileNumber')}
               value={mobileNumber}
               onChange={(e) => setMobileNumber(e.target.value)}
-              className="flex-1 border-0 focus-visible:ring-0"
-            />
-          </div>
-          
-          <div className="flex items-center border rounded-md overflow-hidden">
-            <div className="bg-matka-red p-3">
-              <Mail className="h-5 w-5 text-white" />
-            </div>
-            <Input
-              type="email"
-              placeholder="Email (Optional)"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
               className="flex-1 border-0 focus-visible:ring-0"
             />
           </div>
@@ -113,8 +159,9 @@ const SignupForm = () => {
           <Button 
             type="submit" 
             className="w-full bg-matka-red hover:bg-red-700 text-white py-3"
+            disabled={isLoading}
           >
-            {t('signup')}
+            {isLoading ? 'Please wait...' : t('signup')}
           </Button>
 
           <div className="text-center mt-4">
@@ -124,6 +171,10 @@ const SignupForm = () => {
                 {t('login')}
               </a>
             </p>
+          </div>
+          
+          <div className="text-center text-xs text-gray-500 mt-2">
+            <p>By signing up, you agree to our Terms & Conditions and Privacy Policy</p>
           </div>
         </form>
       </CardContent>

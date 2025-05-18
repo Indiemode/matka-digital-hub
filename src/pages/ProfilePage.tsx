@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LanguageProvider } from '../contexts/LanguageContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import DashboardLayout from '../components/DashboardLayout';
@@ -10,19 +10,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from '@/components/ui/label';
 import { Eye, EyeOff, User } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 const ProfileContent = () => {
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState("profile");
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Mock profile data
-  const profile = {
-    name: 'Rahul Kumar',
-    mobile: '9999304120',
-    email: 'rahul@example.com',
-    balance: 10000,
-  };
+  // Profile data
+  const [profile, setProfile] = useState({
+    name: '',
+    mobile: '',
+    balance: 0,
+  });
 
   // Bank details form
   const [bankDetails, setBankDetails] = useState({
@@ -39,12 +40,56 @@ const ProfileContent = () => {
     confirmPassword: '',
   });
 
-  const handleBankDetailsSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        // Get the current user's session
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session?.user) {
+          // User not logged in, redirect to login page
+          window.location.href = '/';
+          return;
+        }
+        
+        // Fetch profile data
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+          
+        if (error) {
+          console.error('Error fetching profile:', error);
+          toast.error('Failed to load profile data');
+          return;
+        }
+        
+        if (data) {
+          setProfile({
+            name: data.name || '',
+            mobile: data.mobile_number || '',
+            balance: data.balance || 0,
+          });
+        }
+      } catch (error) {
+        console.error('Profile fetch error:', error);
+        toast.error('An error occurred while loading profile data');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchProfileData();
+  }, []);
+
+  const handleBankDetailsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // In a real app, this would update bank details in the database
     toast.success('Bank details updated successfully!');
   };
 
-  const handlePasswordChange = (e: React.FormEvent) => {
+  const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
@@ -52,19 +97,43 @@ const ProfileContent = () => {
       return;
     }
     
-    toast.success('Password changed successfully!');
-    setPasswordForm({
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: '',
-    });
+    try {
+      const { error } = await supabase.auth.updateUser({ 
+        password: passwordForm.newPassword 
+      });
+      
+      if (error) {
+        console.error('Password change error:', error);
+        toast.error(error.message || 'Failed to update password');
+        return;
+      }
+      
+      toast.success('Password changed successfully!');
+      setPasswordForm({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+      });
+    } catch (error) {
+      console.error('Password update error:', error);
+      toast.error('An error occurred while updating password');
+    }
   };
 
-  const handleLogout = () => {
-    toast.success('Logged out successfully');
-    // In a real app, this would clear auth state and redirect
-    window.location.href = '/';
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast.success('Logged out successfully');
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('Failed to log out');
+    }
   };
+
+  if (isLoading) {
+    return <div className="flex justify-center p-8">Loading profile data...</div>;
+  }
 
   return (
     <div className="space-y-6 pb-16">
@@ -81,7 +150,6 @@ const ProfileContent = () => {
             <div>
               <h3 className="text-xl font-bold">{profile.name}</h3>
               <p className="text-gray-600">{profile.mobile}</p>
-              <p className="text-gray-600">{profile.email}</p>
             </div>
           </div>
 
@@ -212,11 +280,11 @@ const ProfileContent = () => {
 };
 
 const ProfilePage = () => {
-  const pageTitleKey = 'profile';
+  const { t } = useLanguage();
 
   return (
     <LanguageProvider>
-      <DashboardLayout title={pageTitleKey}>
+      <DashboardLayout title={t('profile')}>
         <ProfileContent />
       </DashboardLayout>
     </LanguageProvider>

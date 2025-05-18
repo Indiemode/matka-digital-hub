@@ -9,7 +9,132 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      bets: {
+        Row: {
+          amount: number
+          bet_number: string
+          bet_type: string
+          created_at: string
+          id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          bet_number: string
+          bet_type: string
+          created_at?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          bet_number?: string
+          bet_type?: string
+          created_at?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          balance: number
+          created_at: string
+          id: string
+          mobile_number: string
+          name: string | null
+          updated_at: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string
+          id: string
+          mobile_number: string
+          name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          id?: string
+          mobile_number?: string
+          name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      results: {
+        Row: {
+          close_result: string | null
+          created_at: string
+          id: string
+          market_name: string
+          open_result: string | null
+          result_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          close_result?: string | null
+          created_at?: string
+          id?: string
+          market_name: string
+          open_result?: string | null
+          result_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          close_result?: string | null
+          created_at?: string
+          id?: string
+          market_name?: string
+          open_result?: string | null
+          result_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          status: string
+          transaction_type: string
+          updated_at: string
+          user_id: string
+          utr_number: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          status?: string
+          transaction_type: string
+          updated_at?: string
+          user_id: string
+          utr_number?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          status?: string
+          transaction_type?: string
+          updated_at?: string
+          user_id?: string
+          utr_number?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
