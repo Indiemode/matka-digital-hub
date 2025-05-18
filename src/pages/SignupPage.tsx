@@ -1,16 +1,16 @@
 
 import React from 'react';
 import { LanguageProvider } from '../contexts/LanguageContext';
-import LoginForm from '../components/LoginForm';
+import SignupForm from '../components/SignupForm';
 
-const Index = () => {
+const SignupPage = () => {
   return (
     <LanguageProvider>
       <div className="min-h-screen bg-green-500 flex items-center justify-center p-4">
-        <LoginForm />
+        <SignupForm />
       </div>
     </LanguageProvider>
   );
 };
 
-export default Index;
+export default SignupPage;
