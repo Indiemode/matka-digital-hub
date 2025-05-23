@@ -15,10 +15,11 @@ const PaymentQRCode = () => {
   const [utrNumber, setUtrNumber] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Demo QR code - in a real app, this would be generated dynamically
-  const qrCode = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJQAAACUCAIAAAD6XpeBAAAABnRSTlMA/wD/AP83WBt9AAAACXBIWXMAAA7EAAAOxAGVKw4bAAADmklEQVR4nO3dy26jQBRA0ZThf/wLd1SqXODaPl3Vz1mjR4qVFLSND9f39/f3H0ru39UfYCaEFxBeAOEFEF4A4QUQXgDhBRBeAOEFEF4A4QUQXgDhBRBeAOEFEF4A4QUQXgDhBRBeAOEFEF4A4QUQXgDhBRBeAOEFEF4A4QUQXgDhBRBeAOEFEF4A4QUQXgDhBRBeAOEFEF4A4QUQXoB/r/oH/PP5fKrHPo7jW/8JhVfL4zge9Zbr8zxv39Xv65F4kozneb5er5/X5dzGdebsz2t9cft+v1fneZ6Px+P709WbrIS3sj7F60NabWr95frzxraCVWRl3PXbqzmV+nrecvgJfF5n9fmfz+f6wvXa7DbXbel2wzV9eEVk5djqwdXR1+nre1bNrB5cnfZfc6vdNdOHV3KdUfVYtanaRA15GdlypqtvKOaKlW/sdGa0liRzrYdr1vDW2VWbWm9ttZb1JKtnX21wtaN17jXT2eFaA/i8p95gDfDta8r/sUmC69PXdPry8FZzrXnV1OpRq2fXd+6237XB2/dXm1pvbj1lpzCnDs9F3A+pdE/CuxJeyXXlXy/Q19916xxtJf0HXs+/VjY7JTh1eOsn9mtN6z+sj7He+O2O1oZ3GtMcUw95r9er+pzzlXHN+OGt7yF3ml42vDu9Bzp1eA6rxzh1eHOFt1OC/lEokPACJr/I++uGenkxLht9BZ86PP8xL+CPw4uyS3grxXULt27+1eO7hfR4PG63wevXz+dzn+XG1OEVajNfr9futke1cp9h9YBCdUovXutOd/pcfhFeaeErReY6cKfJJ4fU4f11HVYlUE36qtlVcA0yd/rc/nl3Jw5v/eRbzaLc/a/uv5Qv0JVvLupz4vDKez3VOrhz7/72u8rbRLe/6fSkk4a3nuL7KHl9jvJOzu1LynedlsclrTE7m0R5G6jcTPXs8nKgunW0c6vIicP75avl1bbKRz2qz1kuzsv7P+XNpd0m95PLpfnf5dXzr5fr5WOlvO1U3iYqV7yTr4e/nTW824di93vCS3j95c52G3J9M+iXr78+fHkpUH7ITrpr/3e2Z7x6p7da3pY7Kj+83+1opzH6h2dEAYQXQHgBhBdAeAGEF0B4AYQX4LTh7XQ7ZwmnDS/oswNuQXgBhBdAeAGEF0B4AYQXQHgBhBdAeAGEF0B4AYQXQHgBhBdAeAGEF0B4AYQXQHgBhBdAeAGEF0B4AYQXQHgBhBdAeAGEF0B4AYQXQHgBhBdAeAGEF0B4AYQXQHgBhBdAeAGEF+AHNVM9FUGkf6YAAAAASUVORK5CYII=";
+  // Use the PhonePe QR code image
+  const phonepeQRCode = "/lovable-uploads/3505c347-103d-4321-8788-18ca24b96e26.png";
   const phone1 = "9999304120";
   const phone2 = "9528546586";
+  const upiId = "Q188686344@ybl";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,7 +81,7 @@ const PaymentQRCode = () => {
       <CardContent className="p-6 text-center">
         <div className="mb-6">
           <img 
-            src={qrCode} 
+            src={phonepeQRCode} 
             alt="Payment QR Code" 
             className="mx-auto w-48 h-48 border-2 border-gray-300 p-2"
           />
@@ -93,6 +94,7 @@ const PaymentQRCode = () => {
         <div className="space-y-2 text-lg font-bold text-red-600">
           <div>{phone1}</div>
           <div>{phone2}</div>
+          <div className="text-blue-600 mt-2">UPI ID: {upiId}</div>
         </div>
         
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">

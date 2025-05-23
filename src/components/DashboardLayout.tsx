@@ -1,23 +1,25 @@
 
 import React, { useEffect, useState } from 'react';
-import { useLanguage } from '../contexts/LanguageContext';
+import { useLanguage, LanguageProvider } from '../contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Home, FileClock, User, History, LogOut } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
   title: string;
 }
 
-const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, title }) => {
+const DashboardLayoutContent: React.FC<DashboardLayoutProps> = ({ children, title }) => {
   const { t, language, setLanguage } = useLanguage();
   const [userName, setUserName] = useState<string>('');
+  const navigate = useNavigate();
   
   useEffect(() => {
     // Set document title
-    document.title = `MSM Market - ${title}`;
+    document.title = `MSM Market - ${t(title)}`;
     
     // Get user profile data
     const fetchUserProfile = async () => {
@@ -33,11 +35,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, title }) =>
         if (profileData) {
           setUserName(profileData.name);
         }
+      } else {
+        // If no session, redirect to login
+        navigate('/');
       }
     };
     
     fetchUserProfile();
-  }, [title]);
+  }, [title, t, navigate]);
 
   const toggleLanguage = () => {
     setLanguage(language === 'en' ? 'hi' : 'en');
@@ -76,7 +81,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, title }) =>
 
       {/* Main Content */}
       <main className="flex-grow p-4">
-        <h2 className="text-2xl font-bold mb-4">{title}</h2>
+        <h2 className="text-2xl font-bold mb-4">{t(title)}</h2>
         {children}
       </main>
 
@@ -105,6 +110,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, title }) =>
       {/* Add padding at the bottom to account for fixed nav */}
       <div className="h-16"></div>
     </div>
+  );
+};
+
+const DashboardLayout: React.FC<DashboardLayoutProps> = (props) => {
+  return (
+    <LanguageProvider>
+      <DashboardLayoutContent {...props} />
+    </LanguageProvider>
   );
 };
 

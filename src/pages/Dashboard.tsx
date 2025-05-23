@@ -1,7 +1,5 @@
 
 import React, { useState, useEffect } from 'react';
-import { LanguageProvider } from '../contexts/LanguageContext';
-import { useLanguage } from '../contexts/LanguageContext';
 import DashboardLayout from '../components/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,36 +23,11 @@ interface Result {
 }
 
 const DashboardContent = () => {
-  const { t } = useLanguage();
   const navigate = useNavigate();
   const [balance, setBalance] = useState<number>(0);
   const [recentResults, setRecentResults] = useState<Result[]>([]);
+  const [markets, setMarkets] = useState<Market[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  // Mock market data (this would normally come from an API)
-  const markets: Market[] = [
-    { 
-      id: 1, 
-      name: 'KALYAN', 
-      openTime: '11:15 AM', 
-      closeTime: '01:30 PM',
-      status: 'open'
-    },
-    { 
-      id: 2, 
-      name: 'MILAN DAY', 
-      openTime: '02:00 PM', 
-      closeTime: '04:00 PM',
-      status: 'open'
-    },
-    { 
-      id: 3, 
-      name: 'MAIN BAZAR', 
-      openTime: '09:05 PM', 
-      closeTime: '11:45 PM',
-      status: 'closed'
-    },
-  ];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -93,6 +66,32 @@ const DashboardContent = () => {
         } else {
           setRecentResults(resultsData || []);
         }
+
+        // In a real application, markets would come from the database
+        // For now, we'll simulate this data
+        setMarkets([
+          { 
+            id: 1, 
+            name: 'KALYAN', 
+            openTime: '11:15 AM', 
+            closeTime: '01:30 PM',
+            status: 'open'
+          },
+          { 
+            id: 2, 
+            name: 'MILAN DAY', 
+            openTime: '02:00 PM', 
+            closeTime: '04:00 PM',
+            status: 'open'
+          },
+          { 
+            id: 3, 
+            name: 'MAIN BAZAR', 
+            openTime: '09:05 PM', 
+            closeTime: '11:45 PM',
+            status: 'closed'
+          },
+        ]);
       } catch (error) {
         console.error('Dashboard data fetch error:', error);
       } finally {
@@ -142,7 +141,7 @@ const DashboardContent = () => {
 
         {/* Markets Section */}
         <div>
-          <h3 className="text-lg font-medium mb-2">{t('market')}</h3>
+          <h3 className="text-lg font-medium mb-2">Markets</h3>
           <div className="space-y-3">
             {markets.map((market) => (
               <Card key={market.id} className="bg-white shadow-md">
@@ -174,15 +173,15 @@ const DashboardContent = () => {
 
         {/* Recent Results Section */}
         <div>
-          <h3 className="text-lg font-medium mb-2">{t('results')}</h3>
+          <h3 className="text-lg font-medium mb-2">Results</h3>
           <Card className="bg-white shadow-md">
             <CardContent className="p-4">
               <table className="w-full">
                 <thead>
                   <tr className="text-left border-b">
-                    <th className="pb-2">{t('market')}</th>
-                    <th className="pb-2">{t('date')}</th>
-                    <th className="pb-2">{t('results')}</th>
+                    <th className="pb-2">Market</th>
+                    <th className="pb-2">Date</th>
+                    <th className="pb-2">Results</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -221,15 +220,10 @@ const DashboardContent = () => {
 };
 
 const Dashboard = () => {
-  const { t } = useLanguage();
-  const pageTitleKey = 'home';
-
   return (
-    <LanguageProvider>
-      <DashboardLayout title={pageTitleKey}>
-        <DashboardContent />
-      </DashboardLayout>
-    </LanguageProvider>
+    <DashboardLayout title="Home">
+      <DashboardContent />
+    </DashboardLayout>
   );
 };
 
