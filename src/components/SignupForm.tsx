@@ -47,7 +47,6 @@ const SignupForm = () => {
       }
       
       // Create a valid email using the mobile number
-      // We're using gmail.com which is always accepted as valid
       const email = `${mobileNumber}@gmail.com`;
       
       // Create the auth user with a valid email format
@@ -75,27 +74,19 @@ const SignupForm = () => {
       
       console.log('User created successfully:', authData.user);
       
-      try {
-        // Use service role key to insert profile without RLS restrictions
-        // Note: In a production app, this should be done via a secure server function
-        // For now, we'll handle this client-side for demonstration
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: authData.user.id,
-            name: name,
-            mobile_number: mobileNumber
-          });
-        
-        if (profileError) {
-          console.error('Error creating profile:', profileError);
-          // Don't show this error to the user as signup has succeeded
-          // but log it for debugging purposes
-        }
-      } catch (profileError) {
-        console.error('Profile creation error:', profileError);
-        // We'll still consider signup successful even if profile creation fails
-        // The admin can fix profile issues separately
+      // Now with the RLS policy in place, we can insert directly to profiles table
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: authData.user.id,
+          name: name,
+          mobile_number: mobileNumber
+        });
+      
+      if (profileError) {
+        console.error('Error creating profile:', profileError);
+        toast.error('Failed to create user profile, please contact support');
+        return;
       }
 
       toast.success('Account created successfully!');
